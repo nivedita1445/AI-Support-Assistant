@@ -4,6 +4,7 @@ import com.nivedita.ai_support_assistant.client.LlmApiClient;
 import com.nivedita.ai_support_assistant.dto.SupportRequest;
 import com.nivedita.ai_support_assistant.dto.SupportResponse;
 import com.nivedita.ai_support_assistant.service.SupportService;
+import com.nivedita.ai_support_assistant.util.DataMaskingUtil;
 import com.nivedita.ai_support_assistant.util.PromptBuilder;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,18 @@ public class SupportServiceImpl implements SupportService {
     @Override
     public SupportResponse processQuery(SupportRequest request) {
 
-        String prompt = PromptBuilder.buildPrompt(request.getQuery());
+        // 1️⃣ GDPR STEP: Mask sensitive data (PII)
+        String maskedQuery = DataMaskingUtil.maskSensitiveData(
+                request.getQuery()
+        );
+
+        // 2️⃣ Build AI prompt using masked input
+        String prompt = PromptBuilder.buildPrompt(maskedQuery);
+
+        // 3️⃣ Call AI (real or fallback)
         String aiReply = llmApiClient.callLlm(prompt);
 
+        // 4️⃣ Return stable API response (API contract frozen)
         return new SupportResponse(
                 aiReply,
                 "MEDIUM",
