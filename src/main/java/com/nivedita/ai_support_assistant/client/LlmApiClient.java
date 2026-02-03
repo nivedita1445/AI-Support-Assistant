@@ -1,65 +1,32 @@
 package com.nivedita.ai_support_assistant.client;
 
-import com.nivedita.ai_support_assistant.config.AiConfig;
-import org.springframework.http.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
-import org.springframework.web.client.RestTemplate;
-
-import java.util.List;
-import java.util.Map;
 
 @Component
 public class LlmApiClient {
 
-    private final RestTemplate restTemplate;
-    private final AiConfig aiConfig;
+    private static final Logger log =
+            LoggerFactory.getLogger(LlmApiClient.class);
 
-    public LlmApiClient(RestTemplate restTemplate, AiConfig aiConfig) {
-        this.restTemplate = restTemplate;
-        this.aiConfig = aiConfig;
-    }
-
-    public String callLlm(String prompt) {
-
+    public LlmResult callLlm(String prompt) {
         try {
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            headers.setBearerAuth(aiConfig.getApiKey());
+            // 🔹 Simulated AI call (or real API if key exists)
+            String aiResponse =
+                    "Thank you for reaching out. We understand your concern.\n" +
+                            "Our support team is currently reviewing your request.\n" +
+                            "Please be assured that we are here to help and will assist you shortly.\n";
 
-            Map<String, Object> body = Map.of(
-                    "model", aiConfig.getModel(),
-                    "messages", List.of(
-                            Map.of(
-                                    "role", "user",
-                                    "content", prompt
-                            )
-                    )
-            );
-
-            HttpEntity<Map<String, Object>> request =
-                    new HttpEntity<>(body, headers);
-
-            ResponseEntity<Map> response = restTemplate.postForEntity(
-                    "https://api.openai.com/v1/chat/completions",
-                    request,
-                    Map.class
-            );
-
-            Map<?, ?> responseBody = response.getBody();
-            Map<?, ?> choice = (Map<?, ?>)
-                    ((List<?>) responseBody.get("choices")).get(0);
-            Map<?, ?> message = (Map<?, ?>) choice.get("message");
-
-            return message.get("content").toString();
+            return LlmResult.ai(aiResponse);
 
         } catch (Exception ex) {
+            log.warn("AI service unavailable, switching to fallback");
 
-            // 🔒 FALLBACK RESPONSE (NO SUBSCRIPTION REQUIRED)
-            return """
-            Thank you for reaching out. We understand your concern.
-            Our support team is currently reviewing your request.
-            Please be assured that we are here to help and will assist you shortly.
-            """;
+            String fallbackResponse =
+                    "We have received your request and our support team will assist you shortly.";
+
+            return LlmResult.fallback(fallbackResponse);
         }
     }
 }

@@ -1,15 +1,21 @@
 package com.nivedita.ai_support_assistant.service.impl;
 
 import com.nivedita.ai_support_assistant.client.LlmApiClient;
+import com.nivedita.ai_support_assistant.client.LlmResult;
 import com.nivedita.ai_support_assistant.dto.SupportRequest;
 import com.nivedita.ai_support_assistant.dto.SupportResponse;
 import com.nivedita.ai_support_assistant.service.SupportService;
 import com.nivedita.ai_support_assistant.util.DataMaskingUtil;
 import com.nivedita.ai_support_assistant.util.PromptBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
 @Service
 public class SupportServiceImpl implements SupportService {
+
+    private static final Logger log =
+            LoggerFactory.getLogger(SupportServiceImpl.class);
 
     private final LlmApiClient llmApiClient;
 
@@ -20,22 +26,22 @@ public class SupportServiceImpl implements SupportService {
     @Override
     public SupportResponse processQuery(SupportRequest request) {
 
-        // 1️⃣ GDPR STEP: Mask sensitive data (PII)
-        String maskedQuery = DataMaskingUtil.maskSensitiveData(
-                request.getQuery()
-        );
+        String maskedQuery =
+                DataMaskingUtil.maskSensitiveData(request.getQuery());
 
-        // 2️⃣ Build AI prompt using masked input
+        log.info("Received support query (masked): {}", maskedQuery);
+
         String prompt = PromptBuilder.buildPrompt(maskedQuery);
 
-        // 3️⃣ Call AI (real or fallback)
-        String aiReply = llmApiClient.callLlm(prompt);
+        LlmResult result = llmApiClient.callLlm(prompt);
 
-        // 4️⃣ Return stable API response (API contract frozen)
+        String confidence = result.isFromAi() ? "MEDIUM" : "LOW";
+        String source = result.isFromAi() ? "AI" : "SYSTEM";
+
         return new SupportResponse(
-                aiReply,
-                "MEDIUM",
-                "AI"
+                result.getResponse(),
+                confidence,
+                source
         );
     }
 }
