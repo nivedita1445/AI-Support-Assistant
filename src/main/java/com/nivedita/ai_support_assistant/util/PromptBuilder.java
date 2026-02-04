@@ -1,7 +1,6 @@
 package com.nivedita.ai_support_assistant.util;
 
 import com.nivedita.ai_support_assistant.model.ConversationMessage;
-
 import java.util.List;
 
 public class PromptBuilder {
@@ -14,8 +13,8 @@ public class PromptBuilder {
     ) {
         StringBuilder prompt = new StringBuilder();
 
-        prompt.append("You are a customer support assistant.\n");
-        prompt.append("Be professional, concise, and helpful.\n\n");
+        prompt.append("You are a professional customer support assistant.\n");
+        prompt.append("Respond clearly and politely.\n\n");
 
         if (!context.isEmpty()) {
             prompt.append("Conversation history:\n");

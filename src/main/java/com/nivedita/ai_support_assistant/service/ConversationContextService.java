@@ -10,8 +10,8 @@ public class ConversationContextService {
 
     private static final int MAX_HISTORY = 5;
 
-    // key = clientId, value = conversation history
-    private final Map<String, Deque<ConversationMessage>> conversations = new HashMap<>();
+    private final Map<String, Deque<ConversationMessage>> conversations =
+            new HashMap<>();
 
     public List<ConversationMessage> getContext(String clientId) {
         return new ArrayList<>(
