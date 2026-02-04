@@ -182,7 +182,7 @@ real-world backend deployment flow.
 POST http://35.156.156.13:8085/api/v1/support/query
 ```
 
-```
+```http
 GET http://35.156.156.13:8085/actuator/health
 ```
 
